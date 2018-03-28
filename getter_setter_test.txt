@@ -1,0 +1,83 @@
+geth --datadir data1 --maxpeers=1 init ./genesis.json
+geth --datadir="data1" -verbosity 6 --port 30301 --rpc --rpccorsdomain "http://localhost:8545" --rpcapi "eth,web3,net" --networkid 123 console 2>> data1.log
+> eth.accounts
+[]
+> personal.newAccount("vizeet")
+"0xfd8e439069d7bbe4f72d3b9ef1d8de044a8eca4c"
+> var abi = [{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]
+undefined
+> var myContract = eth.contract(abi);
+undefined
+> var bytecode = '0x6060604052341561000f57600080fd5b60db8061001d6000396000f3006060604052600436106049576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806360fe47b114604e5780636d4ce63c146076575b600080fd5b3415605857600080fd5b607460048036038101908080359060200190929190505050609c565b005b3415608057600080fd5b608660a6565b6040518082815260200191505060405180910390f35b8060008190555050565b600080549050905600a165627a7a72305820a9f8e774caec37d21fd59ea1355e7a9bfdf6273516640b223d19224889eb984d0029'
+undefined
+> var txDeploy = {from:eth.coinbase, data: bytecode, gas: 1000000}; 
+> personal.unlockAccount('0xfd8e439069d7bbe4f72d3b9ef1d8de044a8eca4c', 'vizeet')
+true
+> miner.start()
+null
+> eth.getBalance(eth.coinbase)
+108000000000000000000
+> miner.stop()
+true
+> var myContractPartialInstance = myContract.new(txDeploy);
+undefined
+> miner.setEtherbase(eth.accounts[0])
+true
+> miner.start()
+null
+> eth.getBalance(eth.coinbase)
+150000000000000000000
+> miner.stop()
+true
+> myContractPartialInstance
+{
+  abi: [{
+      constant: false,
+      inputs: [{...}],
+      name: "set",
+      outputs: [],
+      payable: false,
+      stateMutability: "nonpayable",
+      type: "function"
+  }, {
+      constant: true,
+      inputs: [],
+      name: "get",
+      outputs: [{...}],
+      payable: false,
+      stateMutability: "view",
+      type: "function"
+  }],
+  address: "0x839ae1b0cc1125d5cd7d0d0413fba5e6676d79e3",
+  transactionHash: "0x6f6e33c74caa70a9b8e8da2c1b4b93fd97e8ca025a4e7d5cfba08c0998a083e3",
+  allEvents: function(),
+  get: function(),
+  set: function()
+}
+> var tx = myContractPartialInstance.set(123, {from: eth.accounts[0], gas: 90000})
+undefined
+> miner.start()
+null
+> eth.getBalance(eth.coinbase)
+186000000000000000000
+> eth.getBalance(eth.coinbase)
+189000000000000000000
+> miner.stop()
+true
+> eth.getTransactionReceipt(tx)
+{
+  blockHash: "0x0755ced4ef44dfee6f6ef51d46e9d2338ff4a707191d9643c3c998499b2fed7f",
+  blockNumber: 60,
+  contractAddress: null,
+  cumulativeGasUsed: 41664,
+  from: "0xfd8e439069d7bbe4f72d3b9ef1d8de044a8eca4c",
+  gasUsed: 41664,
+  logs: [],
+  logsBloom: "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  status: "0x1",
+  to: "0x839ae1b0cc1125d5cd7d0d0413fba5e6676d79e3",
+  transactionHash: "0xa44ed798a08843312d0847c13e0442c999d036e84195c2b5c849572f51aabb93",
+  transactionIndex: 0
+}
+> myContractPartialInstance.get()
+123
