@@ -2,9 +2,14 @@ var abi = <abi from solc>;
  var myContract = eth.contract(abi); 
  var bytecode = '0x' + <bytecode from solc>;
  var txDeploy = {from:eth.coinbase, data: bytecode, gas: 1000000}; 
- var myContractPartialInstance = myContract.new("Hello World!!!", txDeploy); 
+var myContractPartialInstance = myContract.new("Hello World!!!", txDeploy,
+function (e, contract)
+{  
+    console.log(e, contract);    
+     if (typeof contract.address !== 'undefined') 
+         { console.log('Contract mined! address: ' +contract.address + ' transactionHash: ' + contract.transactionHash);}  
+})
 
  miner.setEtherbase(eth.accounts[0])
  miner.start(4)
 miner.stop()
-myContractPartialInstance.greet()
